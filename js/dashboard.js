@@ -174,6 +174,34 @@ function renderStageBreakdown(projects) {
     `).join('');
 }
 
+// Status weight mapping for workload calculation
+const STATUS_WEIGHTS = {
+    'wp conversion - pending': 10,
+    'wp conversion qa': 8,
+    'page creation - pending': 6,
+    'page creation qa': 5,
+    'page creation qa - fixing': 4,
+    'page creation qa - verifying': 3,
+    'golive approval pending': 2,
+    'golive qa': 1,
+    'golive qa - fixing': 1
+};
+
+// Get weight for a project based on its status
+function getProjectWeight(status) {
+    if (!status) return 0;
+    const statusLower = status.toLowerCase();
+    return STATUS_WEIGHTS[statusLower] || 0;
+}
+
+// Get workload level based on score
+function getWorkloadLevel(score) {
+    if (score >= 50) return { level: 'critical', label: 'Critical', color: '#ef4444' };
+    if (score >= 35) return { level: 'high', label: 'High', color: '#f59e0b' };
+    if (score >= 20) return { level: 'moderate', label: 'Moderate', color: '#3b82f6' };
+    return { level: 'light', label: 'Light', color: '#10b981' };
+}
+
 // Render workload by webmaster (expandable)
 function renderWorkload(projects) {
     const container = document.getElementById('workloadList');
@@ -184,7 +212,7 @@ function renderWorkload(projects) {
         return !ACTIVE_EXCLUSIONS.includes(status);
     });
     
-    // Group projects by webmaster
+    // Group projects by webmaster and calculate weighted score
     const workloadMap = {};
     
     activeProjects.forEach(project => {
@@ -197,23 +225,37 @@ function renderWorkload(projects) {
             workloadMap[webmasterId] = {
                 id: webmasterId,
                 name: webmasterName,
-                projects: []
+                projects: [],
+                totalScore: 0
             };
         }
         
-        workloadMap[webmasterId].projects.push(project);
+        const weight = getProjectWeight(project.project_status);
+        workloadMap[webmasterId].projects.push({
+            ...project,
+            weight: weight
+        });
+        workloadMap[webmasterId].totalScore += weight;
     });
     
-    const workloadList = Object.values(workloadMap).sort((a, b) => b.projects.length - a.projects.length);
+    // Sort by score (highest workload first)
+    const workloadList = Object.values(workloadMap).sort((a, b) => b.totalScore - a.totalScore);
     
     if (workloadList.length === 0) {
         container.innerHTML = '<div class="empty-state">No active workload data available</div>';
         return;
     }
     
-    const maxActive = Math.max(...workloadList.map(w => w.projects.length), 1);
+    const maxScore = Math.max(...workloadList.map(w => w.totalScore), 1);
     
-    container.innerHTML = workloadList.map(w => `
+    container.innerHTML = workloadList.map(w => {
+        const workloadLevel = getWorkloadLevel(w.totalScore);
+        const barWidth = (w.totalScore / maxScore) * 100;
+        
+        // Sort projects by weight (heaviest first)
+        const sortedProjects = [...w.projects].sort((a, b) => b.weight - a.weight);
+        
+        return `
         <div class="workload-item expandable" data-webmaster-id="${w.id}">
             <div class="workload-header" onclick="toggleWorkloadDetails(${w.id})">
                 <span class="webmaster-name">
@@ -221,26 +263,52 @@ function renderWorkload(projects) {
                     <i class="fas fa-chevron-down expand-icon"></i>
                 </span>
                 <span class="workload-stats">
-                    <span class="active-count">${w.projects.length} active</span>
+                    <span class="workload-score" style="color: ${workloadLevel.color}">
+                        <i class="fas fa-weight-hanging"></i> ${w.totalScore} pts
+                    </span>
+                    <span class="workload-level" style="background: ${workloadLevel.color}20; color: ${workloadLevel.color}">
+                        ${workloadLevel.label}
+                    </span>
+                    <span class="project-count-small">${w.projects.length} projects</span>
                 </span>
             </div>
             <div class="workload-bar">
-                <div class="bar-fill" style="width: ${(w.projects.length / maxActive) * 100}%"></div>
+                <div class="bar-fill" style="width: ${barWidth}%; background: linear-gradient(90deg, ${workloadLevel.color}, ${workloadLevel.color}aa)"></div>
             </div>
             <div class="workload-details" id="workload-details-${w.id}" style="display: none;">
+                <div class="workload-summary">
+                    <div class="summary-item">
+                        <span class="summary-label">Total Score:</span>
+                        <span class="summary-value">${w.totalScore} points</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Active Projects:</span>
+                        <span class="summary-value">${w.projects.length}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Average Weight:</span>
+                        <span class="summary-value">${(w.totalScore / w.projects.length).toFixed(1)} pts/project</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Workload Level:</span>
+                        <span class="summary-value" style="color: ${workloadLevel.color}">${workloadLevel.label}</span>
+                    </div>
+                </div>
                 <table class="detail-table">
                     <thead>
                         <tr>
                             <th>Project</th>
                             <th>Status</th>
+                            <th>Weight</th>
                             <th>Target Date</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${w.projects.map(p => `
+                        ${sortedProjects.map(p => `
                             <tr>
                                 <td><a href="${escapeHtml(p.ticket_link)}" target="_blank" class="project-link">${escapeHtml(p.project_name)}</a></td>
                                 <td><span class="status-badge ${getStatusClass(p.project_status)}">${p.project_status || 'N/A'}</span></td>
+                                <td><span class="weight-badge weight-${p.weight >= 8 ? 'high' : p.weight >= 5 ? 'medium' : 'low'}">${p.weight} pts</span></td>
                                 <td>${p.target_date ? formatDate(p.target_date) : 'Not set'}</td>
                             </tr>
                         `).join('')}
@@ -248,7 +316,8 @@ function renderWorkload(projects) {
                 </table>
             </div>
         </div>
-    `).join('');
+    `;
+    }).join('');
 }
 
 // Toggle workload details

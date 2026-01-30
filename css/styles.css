@@ -829,6 +829,29 @@ body {
     display: flex;
     gap: 16px;
     font-size: 0.85rem;
+    align-items: center;
+}
+
+.workload-score {
+    font-weight: 700;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.workload-level {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.project-count-small {
+    color: var(--text-muted);
+    font-size: 0.8rem;
 }
 
 .active-count {
@@ -1750,6 +1773,60 @@ body {
 
 .text-warning {
     color: var(--warning) !important;
+}
+
+/* Workload summary section */
+.workload-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+    padding: 16px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    margin-bottom: 16px;
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.summary-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.summary-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Weight badges */
+.weight-badge {
+    display: inline-flex;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.weight-badge.weight-high {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+}
+
+.weight-badge.weight-medium {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+}
+
+.weight-badge.weight-low {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
 }
 
 /* Success button variation */
