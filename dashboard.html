@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Goal Tracker - Dashboard</title>
+    <title>Golive Projects - Dashboard</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-brand">
-            <i class="fas fa-bullseye"></i> Goal Tracker
+            <i class="fas fa-rocket"></i>
+ Golive Projects
         </div>
         <div class="nav-links">
             <a href="dashboard.html" class="active"><i class="fas fa-chart-line"></i> Dashboard</a>
@@ -169,6 +170,28 @@
                 </div>
                 <div class="analytics-content" id="liveContent">
                     <!-- Live sites stats will be rendered here -->
+                </div>
+            </div>
+
+            <!-- Overdue Tasks -->
+            <div class="analytics-card">
+                <div class="analytics-header">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Overdue Tasks</h3>
+                    <span class="analytics-subtitle">Tasks pending >3 business days without update or completion</span>
+                </div>
+                <div class="analytics-content" id="overdueTasksContent">
+                    <!-- Overdue tasks will be rendered here -->
+                </div>
+            </div>
+
+            <!-- Stuck Projects -->
+            <div class="analytics-card">
+                <div class="analytics-header">
+                    <h3><i class="fas fa-hourglass-half"></i> Stuck Projects</h3>
+                    <span class="analytics-subtitle">Projects in the same status for an extended period</span>
+                </div>
+                <div class="analytics-content" id="stuckProjectsContent">
+                    <!-- Stuck projects will be rendered here -->
                 </div>
             </div>
         </div>

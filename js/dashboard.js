@@ -2,6 +2,7 @@
 
 let allProjects = [];
 let allWebmasters = [];
+let allTasks = [];
 
 // Status constants
 const LIVE_STATUSES = ['live', 'completed', 'golive qa', 'golive qa - fixing'];
@@ -75,6 +76,16 @@ async function loadDashboardData() {
         
         if (projectsError) throw projectsError;
         
+        // Get all tasks with project info
+        const { data: tasks, error: tasksError } = await supabaseClient
+            .from('tasks')
+            .select(`
+                *,
+                projects:project_id (id, project_name, ticket_link, assigned_webmaster, users:assigned_webmaster (id, name))
+            `);
+        
+        if (tasksError) throw tasksError;
+        
         // Get total users
         const { count: totalUsers } = await supabaseClient
             .from('users')
@@ -88,6 +99,7 @@ async function loadDashboardData() {
         
         allProjects = projects || [];
         allWebmasters = webmasters || [];
+        allTasks = tasks || [];
         
         // Calculate stats
         const totalProjects = allProjects.length;
@@ -115,6 +127,8 @@ async function loadDashboardData() {
         renderSpeedRanking(allProjects);
         renderConversionStats(allProjects);
         renderLiveSitesStats(allProjects);
+        renderOverdueTasks(allTasks);
+        renderStuckProjects(allProjects);
         
     } catch (err) {
         console.error('Error loading dashboard data:', err);
@@ -612,4 +626,196 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// ====================================
+// Overdue Tasks Analysis
+// ====================================
+
+// Calculate business days between two dates (excluding weekends)
+function getBusinessDaysDiff(startDate, endDate) {
+    let count = 0;
+    const curDate = new Date(startDate);
+    while (curDate <= endDate) {
+        const dayOfWeek = curDate.getDay();
+        if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+            count++;
+        }
+        curDate.setDate(curDate.getDate() + 1);
+    }
+    return count;
+}
+
+// Render overdue tasks (tasks with null ticket_updated_date or completed_date for >3 business days)
+function renderOverdueTasks(tasks) {
+    const container = document.getElementById('overdueTasksContent');
+    if (!container) return;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Filter tasks that are overdue
+    const overdueTasks = tasks.filter(task => {
+        // Skip if task is completed
+        if (task.completed_date) return false;
+        
+        // Check if ticket_updated_date or completed_date is null
+        const sentDate = task.sent_date ? new Date(task.sent_date) : null;
+        if (!sentDate) return false;
+        
+        const businessDays = getBusinessDaysDiff(sentDate, today);
+        
+        // If no ticket_updated_date and more than 3 business days since sent
+        if (!task.ticket_updated_date && businessDays > 3) {
+            return true;
+        }
+        
+        // If ticket was updated but no completed_date and more than 3 business days since update
+        if (task.ticket_updated_date && !task.completed_date) {
+            const updatedDate = new Date(task.ticket_updated_date);
+            const daysSinceUpdate = getBusinessDaysDiff(updatedDate, today);
+            if (daysSinceUpdate > 3) {
+                return true;
+            }
+        }
+        
+        return false;
+    }).map(task => {
+        const sentDate = new Date(task.sent_date);
+        const businessDays = getBusinessDaysDiff(sentDate, today);
+        return {
+            ...task,
+            overdueDays: businessDays
+        };
+    }).sort((a, b) => b.overdueDays - a.overdueDays);
+    
+    if (overdueTasks.length === 0) {
+        container.innerHTML = '<div class="empty-state success"><i class="fas fa-check-circle"></i> No overdue tasks found</div>';
+        return;
+    }
+    
+    container.innerHTML = `
+        <div class="overdue-count">${overdueTasks.length} overdue task${overdueTasks.length !== 1 ? 's' : ''}</div>
+        <div class="overdue-list">
+            ${overdueTasks.map(task => `
+                <div class="overdue-item ${task.overdueDays > 7 ? 'critical' : task.overdueDays > 5 ? 'warning' : ''}">
+                    <div class="overdue-header">
+                        <span class="overdue-task-name">${escapeHtml(task.task_name)}</span>
+                        <span class="overdue-days ${task.overdueDays > 7 ? 'critical' : task.overdueDays > 5 ? 'warning' : ''}">${task.overdueDays} business days</span>
+                    </div>
+                    <div class="overdue-meta">
+                        <span><i class="fas fa-project-diagram"></i> 
+                            <a href="${escapeHtml(task.projects?.ticket_link || '#')}" target="_blank" class="project-link">
+                                ${escapeHtml(task.projects?.project_name || 'Unknown Project')}
+                            </a>
+                        </span>
+                        <span><i class="fas fa-user"></i> ${escapeHtml(task.projects?.users?.name || 'Unassigned')}</span>
+                        <span><i class="fas fa-paper-plane"></i> Sent: ${formatDate(task.sent_date)}</span>
+                        ${task.ticket_updated_date ? `<span><i class="fas fa-sync"></i> Updated: ${formatDate(task.ticket_updated_date)}</span>` : '<span class="text-warning"><i class="fas fa-exclamation-circle"></i> Never updated</span>'}
+                    </div>
+                    ${task.description ? `<div class="overdue-description">${escapeHtml(task.description).substring(0, 80)}${task.description.length > 80 ? '...' : ''}</div>` : ''}
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+// ====================================
+// Stuck Projects Analysis
+// ====================================
+
+// Format duration nicely
+function formatDuration(days) {
+    if (days >= 365) {
+        const years = Math.floor(days / 365);
+        const months = Math.floor((days % 365) / 30);
+        return `${years}y ${months}m`;
+    } else if (days >= 30) {
+        const months = Math.floor(days / 30);
+        const weeks = Math.floor((days % 30) / 7);
+        return `${months}m ${weeks}w`;
+    } else if (days >= 7) {
+        const weeks = Math.floor(days / 7);
+        const d = days % 7;
+        return `${weeks}w ${d}d`;
+    }
+    return `${days}d`;
+}
+
+// Render stuck projects (projects in same status for extended period)
+function renderStuckProjects(projects) {
+    const container = document.getElementById('stuckProjectsContent');
+    if (!container) return;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Filter active projects (not Live or Completed)
+    const stuckProjects = projects
+        .filter(p => {
+            const status = (p.project_status || '').toLowerCase();
+            return !['live', 'completed'].includes(status);
+        })
+        .map(project => {
+            // Determine when the project entered its current status
+            // We'll use the most recent relevant date based on status
+            let statusEntryDate = null;
+            const status = (project.project_status || '').toLowerCase();
+            
+            if (status.includes('wp conversion - pending')) {
+                statusEntryDate = project.webmaster_assigned_date;
+            } else if (status.includes('wp conversion qa')) {
+                statusEntryDate = project.date_sent_to_wp_qa;
+            } else if (status.includes('page creation - pending')) {
+                statusEntryDate = project.date_finished_wp_qa || project.date_finished_wp_bugs;
+            } else if (status.includes('page creation qa')) {
+                statusEntryDate = project.date_sent_to_page_qa;
+            } else if (status.includes('golive approval')) {
+                statusEntryDate = project.date_finished_page_qa || project.date_finished_page_bugs;
+            } else if (status.includes('golive qa')) {
+                statusEntryDate = project.date_sent_to_golive_qa;
+            }
+            
+            // Fallback to created_at if no status entry date found
+            if (!statusEntryDate) {
+                statusEntryDate = project.created_at;
+            }
+            
+            const entryDate = new Date(statusEntryDate);
+            const daysInStatus = Math.floor((today - entryDate) / (1000 * 60 * 60 * 24));
+            
+            return {
+                ...project,
+                statusEntryDate: statusEntryDate,
+                daysInStatus: daysInStatus
+            };
+        })
+        .filter(p => p.daysInStatus >= 7) // Only show projects stuck for at least 7 days
+        .sort((a, b) => b.daysInStatus - a.daysInStatus);
+    
+    if (stuckProjects.length === 0) {
+        container.innerHTML = '<div class="empty-state success"><i class="fas fa-check-circle"></i> No stuck projects found</div>';
+        return;
+    }
+    
+    container.innerHTML = `
+        <div class="stuck-count">${stuckProjects.length} project${stuckProjects.length !== 1 ? 's' : ''} stuck</div>
+        <div class="stuck-list">
+            ${stuckProjects.map(project => `
+                <div class="stuck-item ${project.daysInStatus > 30 ? 'critical' : project.daysInStatus > 14 ? 'warning' : ''}">
+                    <div class="stuck-header">
+                        <a href="${escapeHtml(project.ticket_link)}" target="_blank" class="project-link stuck-name">
+                            ${escapeHtml(project.project_name)}
+                        </a>
+                        <span class="stuck-duration ${project.daysInStatus > 30 ? 'critical' : project.daysInStatus > 14 ? 'warning' : ''}">${formatDuration(project.daysInStatus)}</span>
+                    </div>
+                    <div class="stuck-meta">
+                        <span class="status-badge ${getStatusClass(project.project_status)}">${project.project_status}</span>
+                        <span><i class="fas fa-user"></i> ${escapeHtml(project.users?.name || 'Unassigned')}</span>
+                        <span><i class="fas fa-calendar"></i> Since: ${formatDate(project.statusEntryDate)}</span>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
 }

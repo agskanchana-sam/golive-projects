@@ -2,6 +2,7 @@
 
 let allProjects = [];
 let allWebmasters = [];
+let currentProjectTasks = [];
 
 document.addEventListener('DOMContentLoaded', async function() {
     const user = getCurrentUser();
@@ -10,6 +11,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     await loadWebmasters();
     setupProjectModal();
     setupFilters();
+    setupTaskHandlers();
     await loadProjects();
 });
 
@@ -62,7 +64,8 @@ function filterProjects() {
     
     if (searchTerm) {
         filtered = filtered.filter(p => 
-            p.project_name && p.project_name.toLowerCase().includes(searchTerm)
+            (p.project_name && p.project_name.toLowerCase().includes(searchTerm)) ||
+            (p.live_site_link && p.live_site_link.toLowerCase().includes(searchTerm))
         );
     }
     
@@ -106,21 +109,25 @@ function setupProjectModal() {
 }
 
 // Open project modal for add/edit
-function openProjectModal(project = null) {
+async function openProjectModal(project = null) {
     const modal = document.getElementById('projectModal');
     const title = document.getElementById('projectModalTitle');
     const form = document.getElementById('projectForm');
+    const tasksSection = document.getElementById('tasksSection');
     
     form.reset();
+    currentProjectTasks = [];
     
     if (project) {
-        // Edit mode
+        // Edit mode - show tasks section
         title.innerHTML = '<i class="fas fa-edit"></i> Edit Project';
         document.getElementById('projectId').value = project.id;
+        tasksSection.style.display = 'block';
         
         // Basic fields
         document.getElementById('projectName').value = project.project_name || '';
         document.getElementById('ticketLink').value = project.ticket_link || '';
+        document.getElementById('liveSiteLink').value = project.live_site_link || '';
         
         // Set status - handle case-insensitive matching
         const statusSelect = document.getElementById('projectStatus');
@@ -172,10 +179,16 @@ function openProjectModal(project = null) {
         document.getElementById('noErrorAfter8Hours').checked = project.no_error_after_8_hours || false;
         document.getElementById('noErrorAfter10Days').checked = project.no_error_after_10_days || false;
         
+        // Load tasks for this project
+        await loadProjectTasks(project.id);
+        
     } else {
-        // Add mode
+        // Add mode - hide tasks section
         title.innerHTML = '<i class="fas fa-plus"></i> Add Project';
         document.getElementById('projectId').value = '';
+        document.getElementById('liveSiteLink').value = '';
+        tasksSection.style.display = 'none';
+        renderTasksList([]);
     }
     
     modal.style.display = 'block';
@@ -259,8 +272,13 @@ function renderProjectsGrid(projects) {
             </div>
             <div class="project-footer">
                 <a href="${escapeHtml(project.ticket_link)}" target="_blank" class="btn btn-sm btn-outline">
-                    <i class="fas fa-external-link-alt"></i> View Ticket
+                    <i class="fas fa-external-link-alt"></i> Ticket
                 </a>
+                ${project.live_site_link ? `
+                <a href="${escapeHtml(project.live_site_link)}" target="_blank" class="btn btn-sm btn-outline btn-success">
+                    <i class="fas fa-globe"></i> Live Site
+                </a>
+                ` : ''}
             </div>
         </div>
     `).join('');
@@ -275,6 +293,7 @@ async function handleProjectSubmit(event) {
     const projectData = {
         project_name: document.getElementById('projectName').value,
         ticket_link: document.getElementById('ticketLink').value,
+        live_site_link: document.getElementById('liveSiteLink').value || null,
         project_status: document.getElementById('projectStatus').value,
         assigned_webmaster: document.getElementById('assignedWebmaster').value || null,
         design_approved_date: document.getElementById('designApprovedDate').value,
@@ -403,4 +422,243 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// ====================================
+// Task Management Functions
+// ====================================
+
+// Setup task handlers
+function setupTaskHandlers() {
+    const addTaskBtn = document.getElementById('addTaskBtn');
+    if (addTaskBtn) {
+        addTaskBtn.addEventListener('click', () => openTaskModal());
+    }
+}
+
+// Load tasks for a project
+async function loadProjectTasks(projectId) {
+    try {
+        const { data, error } = await supabaseClient
+            .from('tasks')
+            .select('*')
+            .eq('project_id', projectId)
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        currentProjectTasks = data || [];
+        renderTasksList(currentProjectTasks);
+        
+    } catch (err) {
+        console.error('Error loading tasks:', err);
+        currentProjectTasks = [];
+        renderTasksList([]);
+    }
+}
+
+// Render tasks list
+function renderTasksList(tasks) {
+    const container = document.getElementById('tasksList');
+    if (!container) return;
+    
+    if (tasks.length === 0) {
+        container.innerHTML = '<div class="empty-state">No tasks found for this project</div>';
+        return;
+    }
+    
+    container.innerHTML = tasks.map(task => `
+        <div class="task-item ${getTaskStatusClass(task)}">
+            <div class="task-header">
+                <span class="task-name">${escapeHtml(task.task_name)}</span>
+                <div class="task-actions">
+                    <button type="button" class="btn-icon" onclick="editTask(${task.id})" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button type="button" class="btn-icon danger" onclick="deleteTask(${task.id})" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            ${task.description ? `<div class="task-description">${escapeHtml(task.description).substring(0, 100)}${task.description.length > 100 ? '...' : ''}</div>` : ''}
+            <div class="task-meta">
+                <span class="task-date"><i class="fas fa-paper-plane"></i> Sent: ${task.sent_date ? formatDate(task.sent_date) : 'N/A'}</span>
+                <span class="task-date"><i class="fas fa-sync"></i> Updated: ${task.ticket_updated_date ? formatDate(task.ticket_updated_date) : '<span class="text-warning">Pending</span>'}</span>
+                <span class="task-date"><i class="fas fa-check-circle"></i> Completed: ${task.completed_date ? formatDate(task.completed_date) : '<span class="text-warning">Pending</span>'}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Get task status class
+function getTaskStatusClass(task) {
+    if (task.completed_date) return 'task-completed';
+    if (task.ticket_updated_date) return 'task-updated';
+    return 'task-pending';
+}
+
+// Open task modal
+function openTaskModal(task = null) {
+    const projectId = document.getElementById('projectId').value;
+    if (!projectId) {
+        alert('Please save the project first before adding tasks.');
+        return;
+    }
+    
+    // Create task modal if it doesn't exist
+    let taskModal = document.getElementById('taskModal');
+    if (!taskModal) {
+        taskModal = document.createElement('div');
+        taskModal.id = 'taskModal';
+        taskModal.className = 'modal';
+        taskModal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="taskModalTitle"><i class="fas fa-tasks"></i> Add Task</h2>
+                    <span class="close" onclick="closeTaskModal()">&times;</span>
+                </div>
+                <form id="taskForm" onsubmit="handleTaskSubmit(event)">
+                    <input type="hidden" id="taskId">
+                    <input type="hidden" id="taskProjectId">
+                    
+                    <div class="form-group">
+                        <label for="taskName">Task Name *</label>
+                        <input type="text" id="taskName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="taskDescription">Description</label>
+                        <textarea id="taskDescription" rows="4"></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taskSentDate">Sent Date *</label>
+                            <input type="date" id="taskSentDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="taskUpdatedDate">Ticket Updated Date</label>
+                            <input type="date" id="taskUpdatedDate">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="taskCompletedDate">Completed Date</label>
+                        <input type="date" id="taskCompletedDate">
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeTaskModal()"><i class="fas fa-times"></i> Cancel</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Task</button>
+                    </div>
+                </form>
+            </div>
+        `;
+        document.body.appendChild(taskModal);
+    }
+    
+    // Reset and populate form
+    const form = document.getElementById('taskForm');
+    form.reset();
+    document.getElementById('taskProjectId').value = projectId;
+    
+    if (task) {
+        document.getElementById('taskModalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Task';
+        document.getElementById('taskId').value = task.id;
+        document.getElementById('taskName').value = task.task_name || '';
+        document.getElementById('taskDescription').value = task.description || '';
+        document.getElementById('taskSentDate').value = task.sent_date || '';
+        document.getElementById('taskUpdatedDate').value = task.ticket_updated_date || '';
+        document.getElementById('taskCompletedDate').value = task.completed_date || '';
+    } else {
+        document.getElementById('taskModalTitle').innerHTML = '<i class="fas fa-plus"></i> Add Task';
+        document.getElementById('taskId').value = '';
+        // Default sent date to today
+        document.getElementById('taskSentDate').value = new Date().toISOString().split('T')[0];
+    }
+    
+    taskModal.style.display = 'block';
+}
+
+// Close task modal
+function closeTaskModal() {
+    const taskModal = document.getElementById('taskModal');
+    if (taskModal) {
+        taskModal.style.display = 'none';
+    }
+}
+
+// Handle task form submission
+async function handleTaskSubmit(event) {
+    event.preventDefault();
+    
+    const taskId = document.getElementById('taskId').value;
+    const projectId = document.getElementById('taskProjectId').value;
+    
+    const taskData = {
+        project_id: parseInt(projectId),
+        task_name: document.getElementById('taskName').value,
+        description: document.getElementById('taskDescription').value || null,
+        sent_date: document.getElementById('taskSentDate').value,
+        ticket_updated_date: document.getElementById('taskUpdatedDate').value || null,
+        completed_date: document.getElementById('taskCompletedDate').value || null
+    };
+    
+    try {
+        let error;
+        
+        if (taskId) {
+            const { error: updateError } = await supabaseClient
+                .from('tasks')
+                .update(taskData)
+                .eq('id', taskId);
+            error = updateError;
+        } else {
+            const { error: insertError } = await supabaseClient
+                .from('tasks')
+                .insert([taskData]);
+            error = insertError;
+        }
+        
+        if (error) throw error;
+        
+        closeTaskModal();
+        await loadProjectTasks(projectId);
+        
+    } catch (err) {
+        console.error('Error saving task:', err);
+        alert('Error saving task. Please try again.');
+    }
+}
+
+// Edit task
+function editTask(taskId) {
+    const task = currentProjectTasks.find(t => t.id === taskId);
+    if (task) {
+        openTaskModal(task);
+    }
+}
+
+// Delete task
+async function deleteTask(taskId) {
+    if (!confirm('Are you sure you want to delete this task?')) {
+        return;
+    }
+    
+    const projectId = document.getElementById('projectId').value;
+    
+    try {
+        const { error } = await supabaseClient
+            .from('tasks')
+            .delete()
+            .eq('id', taskId);
+        
+        if (error) throw error;
+        
+        await loadProjectTasks(projectId);
+        
+    } catch (err) {
+        console.error('Error deleting task:', err);
+        alert('Error deleting task. Please try again.');
+    }
 }

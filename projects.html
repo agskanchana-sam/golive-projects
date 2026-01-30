@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Goal Tracker - Projects</title>
+    <title>Golive Projects - Projects</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-brand">
-            <i class="fas fa-bullseye"></i> Goal Tracker
+            <i class="fas fa-rocket"></i>
+
         </div>
         <div class="nav-links">
             <a href="dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
@@ -30,7 +31,7 @@
         <div class="filters-section">
             <div class="search-box">
                 <i class="fas fa-search"></i>
-                <input type="text" id="searchProject" placeholder="Search by project name...">
+                <input type="text" id="searchProject" placeholder="Search by project name or live site link...">
             </div>
             <div class="filter-group">
                 <label for="filterStatus">Status</label>
@@ -213,6 +214,27 @@
                         <label class="checkbox-label"><input type="checkbox" id="goliveReopenedBugs" name="golive_reopened_bugs"> <span>Go Live Reopened Bugs</span></label>
                         <label class="checkbox-label"><input type="checkbox" id="noErrorAfter8Hours" name="no_error_after_8_hours"> <span>No Error After 8 Hours</span></label>
                         <label class="checkbox-label"><input type="checkbox" id="noErrorAfter10Days" name="no_error_after_10_days"> <span>No Error After 10 Days</span></label>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-globe"></i> Live Site</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="liveSiteLink">Live Site Link</label>
+                            <input type="text" id="liveSiteLink" name="live_site_link" placeholder="https://www.example.com">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tasks Section (visible in edit mode only) -->
+                <div class="form-section tasks-section" id="tasksSection" style="display: none;">
+                    <div class="section-header-with-action">
+                        <h3><i class="fas fa-tasks"></i> Tasks</h3>
+                        <button type="button" class="btn btn-sm btn-primary" id="addTaskBtn"><i class="fas fa-plus"></i> Add Task</button>
+                    </div>
+                    <div class="tasks-list" id="tasksList">
+                        <!-- Tasks will be rendered here -->
                     </div>
                 </div>
 

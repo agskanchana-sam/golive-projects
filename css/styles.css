@@ -1528,3 +1528,246 @@ body {
     font-weight: 400;
     margin-left: 8px;
 }
+
+/* ====================================
+   Tasks Section in Project Form
+   ==================================== */
+
+.section-header-with-action {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-header-with-action h3 {
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+}
+
+.section-header-with-action h3 i {
+    color: var(--primary-light);
+}
+
+.tasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.task-item {
+    background: var(--bg-primary);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    border-left: 3px solid var(--border-color);
+}
+
+.task-item.task-completed {
+    border-left-color: var(--success);
+    opacity: 0.7;
+}
+
+.task-item.task-updated {
+    border-left-color: var(--info);
+}
+
+.task-item.task-pending {
+    border-left-color: var(--warning);
+}
+
+.task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.task-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+}
+
+.task-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.task-description {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+.task-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.task-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.task-meta .text-warning {
+    color: var(--warning);
+}
+
+/* ====================================
+   Overdue Tasks Analytics
+   ==================================== */
+
+.analytics-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-left: auto;
+}
+
+.overdue-count,
+.stuck-count {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.overdue-list,
+.stuck-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.overdue-item,
+.stuck-item {
+    background: var(--bg-primary);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    border-left: 3px solid var(--warning);
+}
+
+.overdue-item.warning,
+.stuck-item.warning {
+    border-left-color: var(--warning);
+}
+
+.overdue-item.critical,
+.stuck-item.critical {
+    border-left-color: var(--danger);
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.overdue-header,
+.stuck-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    gap: 12px;
+}
+
+.overdue-task-name,
+.stuck-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+}
+
+.overdue-days,
+.stuck-duration {
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 4px 10px;
+    border-radius: 12px;
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--warning);
+    white-space: nowrap;
+}
+
+.overdue-days.warning,
+.stuck-duration.warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--warning);
+}
+
+.overdue-days.critical,
+.stuck-duration.critical {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--danger);
+}
+
+.overdue-meta,
+.stuck-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    align-items: center;
+}
+
+.overdue-meta span,
+.stuck-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.overdue-meta .text-warning {
+    color: var(--warning);
+}
+
+.overdue-description {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border-color);
+}
+
+.empty-state.success {
+    color: var(--success);
+}
+
+.empty-state.success i {
+    color: var(--success);
+}
+
+.text-warning {
+    color: var(--warning) !important;
+}
+
+/* Success button variation */
+.btn-outline.btn-success {
+    border-color: var(--success);
+    color: var(--success);
+}
+
+.btn-outline.btn-success:hover {
+    background: var(--success);
+    color: white;
+}
+
+/* Project footer with multiple buttons */
+.project-footer {
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
