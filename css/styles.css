@@ -733,6 +733,11 @@ body {
     border: 1px solid var(--border-color);
 }
 
+.dashboard-section.full-width {
+    width: 100%;
+    margin-bottom: 24px;
+}
+
 .section-header {
     margin-bottom: 24px;
 }
@@ -752,9 +757,139 @@ body {
 
 /* Stage Cards */
 .stage-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    display: block;
+    width: 100%;
+}
+
+/* Workflow Pipeline */
+.workflow-pipeline {
+    display: flex;
+    gap: 0;
+    align-items: stretch;
+    overflow-x: auto;
+    padding: 8px 4px;
+}
+
+.workflow-pipeline::-webkit-scrollbar {
+    height: 8px;
+}
+
+.workflow-pipeline::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 4px;
+}
+
+.workflow-pipeline::-webkit-scrollbar-thumb {
+    background: var(--primary-light);
+    border-radius: 4px;
+}
+
+.workflow-pipeline::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+.pipeline-phase {
+    flex: 1 1 auto;
+    width: calc((100% - 120px) / 4);
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-primary);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    border: 2px solid var(--border-color);
+}
+
+.phase-header {
+    display: flex;
+    align-items: center;
     gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.phase-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.phase-info {
+    flex: 1;
+}
+
+.phase-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 4px 0;
+}
+
+.phase-total {
+    font-size: 1.4rem;
+    font-weight: 700;
+    display: block;
+}
+
+.phase-stages {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.stage-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.stage-item.has-projects {
+    background: var(--bg-input);
+    border-left-color: currentColor;
+}
+
+.stage-item:hover {
+    transform: translateX(4px);
+}
+
+.stage-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.stage-item.has-projects .stage-label {
+    color: var(--text-primary);
+}
+
+.stage-count {
+    font-size: 1.1rem;
+    font-weight: 700;
+    min-width: 32px;
+    text-align: right;
+}
+
+.pipeline-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-light);
+    font-size: 1.8rem;
+    flex-shrink: 0;
+    width: 40px;
+    margin: 0 -2px;
 }
 
 .stage-card {

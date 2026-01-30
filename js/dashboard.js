@@ -139,39 +139,92 @@ async function loadDashboardData() {
 function renderStageBreakdown(projects) {
     const container = document.getElementById('stageCards');
     
-    const stages = [
-        { key: 'WP conversion - Pending', label: 'WP Conversion', icon: 'fa-code', color: '#f39c12' },
-        { key: 'WP Conversion QA', label: 'WP Conversion QA', icon: 'fa-search', color: '#e67e22' },
-        { key: 'Page Creation - Pending', label: 'Page Creation', icon: 'fa-file', color: '#9b59b6' },
-        { key: 'Page creation QA', label: 'Page QA', icon: 'fa-search', color: '#3498db' },
-        { key: 'Page creation QA - Verifying', label: 'Page Verifying', icon: 'fa-check-double', color: '#17a2b8' },
-        { key: 'Page creation QA - Fixing', label: 'Page Fixing', icon: 'fa-wrench', color: '#e74c3c' },
-        { key: 'Golive Approval Pending', label: 'Golive Approval', icon: 'fa-hourglass-half', color: '#6f42c1' },
-        { key: 'Golive QA', label: 'Golive QA', icon: 'fa-rocket', color: '#20c997' },
-        { key: 'Golive QA - Fixing', label: 'Golive Fixing', icon: 'fa-tools', color: '#dc3545' },
-        { key: 'Live', label: 'Live', icon: 'fa-broadcast-tower', color: '#27ae60' },
-        { key: 'Completed', label: 'Completed', icon: 'fa-check-circle', color: '#2ecc71' }
+    // Group stages by workflow phase
+    const workflow = [
+        {
+            phase: 'WP Conversion',
+            icon: 'fa-code',
+            color: '#f39c12',
+            stages: [
+                { key: 'WP conversion - Pending', label: 'Pending', count: 0 },
+                { key: 'WP Conversion QA', label: 'QA', count: 0 }
+            ]
+        },
+        {
+            phase: 'Page Creation',
+            icon: 'fa-file-alt',
+            color: '#9b59b6',
+            stages: [
+                { key: 'Page Creation - Pending', label: 'Pending', count: 0 },
+                { key: 'Page creation QA', label: 'QA', count: 0 },
+                { key: 'Page creation QA - Verifying', label: 'Verifying', count: 0 },
+                { key: 'Page creation QA - Fixing', label: 'Fixing', count: 0 }
+            ]
+        },
+        {
+            phase: 'Go Live',
+            icon: 'fa-rocket',
+            color: '#20c997',
+            stages: [
+                { key: 'Golive Approval Pending', label: 'Approval', count: 0 },
+                { key: 'Golive QA', label: 'QA', count: 0 },
+                { key: 'Golive QA - Fixing', label: 'Fixing', count: 0 }
+            ]
+        },
+        {
+            phase: 'Complete',
+            icon: 'fa-check-circle',
+            color: '#27ae60',
+            stages: [
+                { key: 'Live', label: 'Live', count: 0 },
+                { key: 'Completed', label: 'Completed', count: 0 }
+            ]
+        }
     ];
     
-    const stageCounts = stages.map(stage => {
-        const count = projects.filter(p => {
-            const status = (p.project_status || '').toLowerCase();
-            return status === stage.key.toLowerCase();
-        }).length;
-        return { ...stage, count };
+    // Count projects in each stage
+    projects.forEach(p => {
+        const status = (p.project_status || '').toLowerCase();
+        workflow.forEach(phase => {
+            phase.stages.forEach(stage => {
+                if (status === stage.key.toLowerCase()) {
+                    stage.count++;
+                }
+            });
+        });
     });
     
-    container.innerHTML = stageCounts.map(stage => `
-        <div class="stage-card" style="border-left-color: ${stage.color}">
-            <div class="stage-icon" style="background: ${stage.color}20; color: ${stage.color}">
-                <i class="fas ${stage.icon}"></i>
-            </div>
-            <div class="stage-info">
-                <span class="stage-count">${stage.count}</span>
-                <span class="stage-label">${stage.label}</span>
-            </div>
+    // Calculate totals for each phase
+    workflow.forEach(phase => {
+        phase.total = phase.stages.reduce((sum, stage) => sum + stage.count, 0);
+    });
+    
+    container.innerHTML = `
+        <div class="workflow-pipeline">
+            ${workflow.map((phase, index) => `
+                <div class="pipeline-phase">
+                    <div class="phase-header">
+                        <div class="phase-icon" style="background: ${phase.color}20; color: ${phase.color}">
+                            <i class="fas ${phase.icon}"></i>
+                        </div>
+                        <div class="phase-info">
+                            <h4 class="phase-name">${phase.phase}</h4>
+                            <span class="phase-total" style="color: ${phase.color}">${phase.total} project${phase.total !== 1 ? 's' : ''}</span>
+                        </div>
+                    </div>
+                    <div class="phase-stages">
+                        ${phase.stages.map(stage => `
+                            <div class="stage-item ${stage.count > 0 ? 'has-projects' : ''}">
+                                <span class="stage-label">${stage.label}</span>
+                                <span class="stage-count" style="color: ${stage.count > 0 ? phase.color : 'var(--text-muted)'}">${stage.count}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                ${index < workflow.length - 1 ? '<div class="pipeline-arrow"><i class="fas fa-arrow-right"></i></div>' : ''}
+            `).join('')}
         </div>
-    `).join('');
+    `;
 }
 
 // Status weight mapping for workload calculation
