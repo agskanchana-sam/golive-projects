@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goal Tracker - Projects</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-bullseye"></i> Goal Tracker
+        </div>
+        <div class="nav-links">
+            <a href="dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
+            <a href="projects.html" class="active"><i class="fas fa-project-diagram"></i> Projects</a>
+            <a href="users.html" id="usersLink" style="display:none;"><i class="fas fa-users"></i> Users</a>
+            <span id="userInfo"></span>
+            <button id="logoutBtn" class="btn btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-project-diagram"></i> Projects</h1>
+            <button id="addProjectBtn" class="btn btn-primary"><i class="fas fa-plus"></i> Add Project</button>
+        </div>
+
+        <div class="filters-section">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchProject" placeholder="Search by project name...">
+            </div>
+            <div class="filter-group">
+                <label for="filterStatus">Status</label>
+                <select id="filterStatus">
+                    <option value="">All Statuses</option>
+                    <option value="WP conversion - Pending">WP Conversion - Pending</option>
+                    <option value="Page Creation - Pending">Page Creation - Pending</option>
+                    <option value="Page creation QA">Page Creation QA</option>
+                    <option value="Page creation QA - Verifying">Page Creation QA - Verifying</option>
+                    <option value="Page creation QA - Fixing">Page Creation QA - Fixing</option>
+                    <option value="Golive Approval Pending">Golive Approval Pending</option>
+                    <option value="Golive QA - Fixing">Golive QA - Fixing</option>
+                    <option value="Live">Live</option>
+                    <option value="Completed">Completed</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filterWebmaster">Webmaster</label>
+                <select id="filterWebmaster">
+                    <option value="">All Webmasters</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="projects-count">
+            <span id="projectsCount">0</span> projects found
+        </div>
+
+        <div class="projects-grid" id="projectsGrid">
+            <!-- Project cards will be rendered here -->
+        </div>
+    </div>
+
+    <!-- Add/Edit Project Modal -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="projectModalTitle"><i class="fas fa-project-diagram"></i> Add Project</h2>
+                <span class="close">&times;</span>
+            </div>
+            <form id="projectForm">
+                <input type="hidden" id="projectId">
+                
+                <div class="form-section">
+                    <h3><i class="fas fa-info-circle"></i> Basic Information</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="projectName">Project Name *</label>
+                            <input type="text" id="projectName" name="project_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ticketLink">Ticket Link *</label>
+                            <input type="text" id="ticketLink" name="ticket_link" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="projectStatus">Status</label>
+                            <select id="projectStatus" name="project_status">
+                                <option value="WP conversion - Pending">WP Conversion - Pending</option>
+                                <option value="Page Creation - Pending">Page Creation - Pending</option>
+                                <option value="Page creation QA">Page Creation QA</option>
+                                <option value="Page creation QA - Verifying">Page Creation QA - Verifying</option>
+                                <option value="Page creation QA - Fixing">Page Creation QA - Fixing</option>
+                                <option value="Golive Approval Pending">Golive Approval Pending</option>
+                                <option value="Golive QA - Fixing">Golive QA - Fixing</option>
+                                <option value="Live">Live</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="assignedWebmaster">Assigned Webmaster</label>
+                            <select id="assignedWebmaster" name="assigned_webmaster">
+                                <option value="">Select Webmaster</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="designApprovedDate">Design Approved Date *</label>
+                            <input type="date" id="designApprovedDate" name="design_approved_date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="webmasterAssignedDate">Webmaster Assigned Date *</label>
+                            <input type="date" id="webmasterAssignedDate" name="webmaster_assigned_date" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="targetDate">Target Date</label>
+                            <input type="date" id="targetDate" name="target_date">
+                        </div>
+                        <div class="form-group">
+                            <label for="signedUpDate">Signed Up Date</label>
+                            <input type="date" id="signedUpDate" name="signed_up_date">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contractStartDate">Contract Start Date</label>
+                            <input type="date" id="contractStartDate" name="contract_start_date">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-code"></i> WP Conversion</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dateSentToWpQa">Sent to WP QA</label>
+                            <input type="date" id="dateSentToWpQa" name="date_sent_to_wp_qa">
+                        </div>
+                        <div class="form-group">
+                            <label for="dateFinishedWpQa">Finished WP QA</label>
+                            <input type="date" id="dateFinishedWpQa" name="date_finished_wp_qa">
+                        </div>
+                        <div class="form-group">
+                            <label for="dateFinishedWpBugs">Finished WP Bugs</label>
+                            <input type="date" id="dateFinishedWpBugs" name="date_finished_wp_bugs">
+                        </div>
+                    </div>
+                    <div class="form-row checkboxes">
+                        <label class="checkbox-label"><input type="checkbox" id="managerSentBack" name="manager_sent_back"> <span>Manager Sent Back</span></label>
+                        <label class="checkbox-label"><input type="checkbox" id="wpReopenedBugs" name="wp_reopened_bugs"> <span>WP Reopened Bugs</span></label>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-file-alt"></i> Page Creation</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dateSentToPageQa">Sent to Page QA</label>
+                            <input type="date" id="dateSentToPageQa" name="date_sent_to_page_qa">
+                        </div>
+                        <div class="form-group">
+                            <label for="dateFinishedPageQa">Finished Page QA</label>
+                            <input type="date" id="dateFinishedPageQa" name="date_finished_page_qa">
+                        </div>
+                        <div class="form-group">
+                            <label for="dateFinishedPageBugs">Finished Page Bugs</label>
+                            <input type="date" id="dateFinishedPageBugs" name="date_finished_page_bugs">
+                        </div>
+                    </div>
+                    <div class="form-row checkboxes">
+                        <label class="checkbox-label"><input type="checkbox" id="pageReopenedBugs" name="page_reopened_bugs"> <span>Page Reopened Bugs</span></label>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-rocket"></i> Go Live</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dnsChangedDate">DNS Changed Date</label>
+                            <input type="date" id="dnsChangedDate" name="dns_changed_date">
+                        </div>
+                        <div class="form-group">
+                            <label for="dateSentToGoliveQa">Sent to Go Live QA</label>
+                            <input type="date" id="dateSentToGoliveQa" name="date_sent_to_golive_qa">
+                        </div>
+                        <div class="form-group">
+                            <label for="dateFinishedGoliveQa">Finished Go Live QA</label>
+                            <input type="date" id="dateFinishedGoliveQa" name="date_finished_golive_qa">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dateFinishedGoliveBugs">Finished Go Live Bugs</label>
+                            <input type="date" id="dateFinishedGoliveBugs" name="date_finished_golive_bugs">
+                        </div>
+                    </div>
+                    <div class="form-row checkboxes">
+                        <label class="checkbox-label"><input type="checkbox" id="goliveReopenedBugs" name="golive_reopened_bugs"> <span>Go Live Reopened Bugs</span></label>
+                        <label class="checkbox-label"><input type="checkbox" id="noErrorAfter8Hours" name="no_error_after_8_hours"> <span>No Error After 8 Hours</span></label>
+                        <label class="checkbox-label"><input type="checkbox" id="noErrorAfter10Days" name="no_error_after_10_days"> <span>No Error After 10 Days</span></label>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelProjectBtn"><i class="fas fa-times"></i> Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/projects.js"></script>
+</body>
+</html>
