@@ -375,13 +375,15 @@ function getStatusClass(status) {
     const statusLower = status.toLowerCase();
     
     // Map exact database statuses to CSS classes
-    if (statusLower.includes('wp conversion')) return 'wp-conversion';
+    if (statusLower.includes('wp conversion - pending')) return 'wp-conversion';
+    if (statusLower.includes('wp conversion qa')) return 'wp-qa';
     if (statusLower.includes('page creation - pending')) return 'page-pending';
     if (statusLower.includes('page creation qa - fixing')) return 'page-fixing';
     if (statusLower.includes('page creation qa - verifying')) return 'page-verifying';
     if (statusLower.includes('page creation qa')) return 'page-qa';
     if (statusLower.includes('golive approval')) return 'golive-approval';
-    if (statusLower.includes('golive qa')) return 'golive-fixing';
+    if (statusLower.includes('golive qa - fixing')) return 'golive-fixing';
+    if (statusLower.includes('golive qa')) return 'golive-qa';
     if (statusLower === 'live') return 'live';
     if (statusLower === 'completed') return 'completed';
     

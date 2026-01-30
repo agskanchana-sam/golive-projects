@@ -1094,3 +1094,437 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--secondary);
 }
+
+/* ====================================
+   Additional Status Badges
+   ==================================== */
+
+.status-badge.wp-qa {
+    background: rgba(230, 126, 34, 0.15);
+    color: #e67e22;
+}
+
+.status-badge.golive-qa {
+    background: rgba(32, 201, 151, 0.15);
+    color: #20c997;
+}
+
+/* ====================================
+   Analytics Section
+   ==================================== */
+
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 24px;
+    margin-top: 32px;
+}
+
+.analytics-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 24px;
+    border: 1px solid var(--border-color);
+}
+
+.analytics-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.analytics-header h3 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.analytics-header h3 i {
+    color: var(--primary-light);
+}
+
+.analytics-filters {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.filter-inline {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.filter-inline label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.filter-inline select,
+.filter-inline input {
+    padding: 8px 12px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    color: var(--text-primary);
+}
+
+.filter-inline select:focus,
+.filter-inline input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.btn-apply {
+    padding: 8px 16px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-apply:hover {
+    background: var(--primary-dark);
+}
+
+.custom-date-group {
+    display: none;
+}
+
+/* ====================================
+   Expandable Workload
+   ==================================== */
+
+.workload-item.expandable {
+    cursor: pointer;
+}
+
+.workload-item.expandable .workload-header {
+    cursor: pointer;
+}
+
+.workload-item .expand-icon {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    transition: transform 0.2s ease;
+    margin-left: 8px;
+}
+
+.workload-item.expanded {
+    border: 1px solid var(--primary);
+}
+
+.workload-details {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+/* ====================================
+   Detail Tables
+   ==================================== */
+
+.detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.detail-table th,
+.detail-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.detail-table th {
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+.detail-table td {
+    color: var(--text-secondary);
+}
+
+.detail-table tr:last-child td {
+    border-bottom: none;
+}
+
+.project-link {
+    color: var(--primary-light);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.project-link:hover {
+    color: var(--primary);
+    text-decoration: underline;
+}
+
+/* ====================================
+   Ranking Items
+   ==================================== */
+
+.ranking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ranking-item {
+    background: var(--bg-primary);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    transition: all 0.2s ease;
+}
+
+.ranking-item.expanded {
+    border: 1px solid var(--primary);
+}
+
+.ranking-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.rank-badge {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg-input);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.rank-badge.top-1 {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #000;
+}
+
+.rank-badge.top-2 {
+    background: linear-gradient(135deg, #C0C0C0, #A8A8A8);
+    color: #000;
+}
+
+.rank-badge.top-3 {
+    background: linear-gradient(135deg, #CD7F32, #8B4513);
+    color: #fff;
+}
+
+.ranking-name {
+    color: var(--text-primary);
+    font-weight: 500;
+    flex: 1;
+}
+
+.ranking-stats {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.85rem;
+}
+
+.avg-days {
+    color: var(--success);
+    font-weight: 600;
+}
+
+.project-count {
+    color: var(--text-muted);
+}
+
+.ranking-details {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.days-badge {
+    display: inline-flex;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.days-badge.fast {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+}
+
+.days-badge.medium {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+}
+
+.days-badge.slow {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+}
+
+/* ====================================
+   Conversion/Live Items
+   ==================================== */
+
+.conversion-list,
+.live-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.conversion-item,
+.live-item {
+    background: var(--bg-primary);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    transition: all 0.2s ease;
+}
+
+.conversion-item.expanded,
+.live-item.expanded {
+    border: 1px solid var(--primary);
+}
+
+.conversion-header,
+.live-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    margin-bottom: 12px;
+}
+
+.conversion-count,
+.live-count {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.conversion-count {
+    color: var(--info);
+}
+
+.live-count {
+    color: var(--success);
+}
+
+.progress-bar {
+    height: 8px;
+    background: var(--bg-input);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--info) 0%, #60a5fa 100%);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-bar.live-bar .progress-fill {
+    background: linear-gradient(90deg, var(--success) 0%, #34d399 100%);
+}
+
+.conversion-details,
+.live-details {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+/* ====================================
+   Full Width Analytics
+   ==================================== */
+
+.full-width-section {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 768px) {
+    .analytics-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .analytics-header {
+        flex-direction: column;
+    }
+    
+    .analytics-filters {
+        width: 100%;
+    }
+    
+    .filter-inline {
+        flex: 1;
+    }
+}
+
+/* ====================================
+   Analytics Section Title & Layout
+   ==================================== */
+
+.analytics-section {
+    margin-top: 32px;
+}
+
+.analytics-title {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.analytics-title i {
+    color: var(--primary-light);
+}
+
+.analytics-section .analytics-card {
+    margin-bottom: 24px;
+}
+
+.filter-group.compact {
+    min-width: auto;
+}
+
+.filter-group.compact label {
+    font-size: 0.75rem;
+    margin-bottom: 4px;
+}
+
+.filter-group.compact select,
+.filter-group.compact input {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+}
+
+.section-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-left: 8px;
+}
