@@ -395,6 +395,7 @@ function getStatusClass(status) {
     
     // Map exact database statuses to CSS classes
     if (statusLower.includes('wp conversion - pending')) return 'wp-conversion';
+    if (statusLower.includes('wp conversion qa - fixing')) return 'wp-qa-fixing';
     if (statusLower.includes('wp conversion qa')) return 'wp-qa';
     if (statusLower.includes('page creation - pending')) return 'page-pending';
     if (statusLower.includes('page creation qa - fixing')) return 'page-fixing';

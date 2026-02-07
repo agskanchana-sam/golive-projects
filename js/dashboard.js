@@ -147,7 +147,8 @@ function renderStageBreakdown(projects) {
             color: '#f39c12',
             stages: [
                 { key: 'WP conversion - Pending', label: 'Pending', count: 0 },
-                { key: 'WP Conversion QA', label: 'QA', count: 0 }
+                { key: 'WP Conversion QA', label: 'QA', count: 0 },
+                { key: 'WP Conversion QA - Fixing', label: 'Fixing', count: 0 }
             ]
         },
         {
@@ -231,6 +232,7 @@ function renderStageBreakdown(projects) {
 const STATUS_WEIGHTS = {
     'wp conversion - pending': 10,
     'wp conversion qa': 8,
+    'wp conversion qa - fixing': 7,
     'page creation - pending': 6,
     'page creation qa': 5,
     'page creation qa - fixing': 4,
@@ -721,6 +723,7 @@ function getStatusClass(status) {
     const statusLower = status.toLowerCase();
     
     if (statusLower.includes('wp conversion - pending')) return 'wp-conversion';
+    if (statusLower.includes('wp conversion qa - fixing')) return 'wp-qa-fixing';
     if (statusLower.includes('wp conversion qa')) return 'wp-qa';
     if (statusLower.includes('page creation - pending')) return 'page-pending';
     if (statusLower.includes('page creation qa - fixing')) return 'page-fixing';
